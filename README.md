@@ -1,8 +1,12 @@
-# React + Vite
+# 🎮 Wordle - Популярная игра в которой цель игрока угадать слово из 5 букв за 6 попыток
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Об игре:
+TODO: написать
 
-Currently, two official plugins are available:
+## Стек технологий:
+ - **react-router**: Удобный роутинг в приложении
+ - **react-modal**: Для быстрого создания модальных окон в пару строчек кода
+ - **TailwindCSS**: Самая популярная UI библиотека для быстрого создания удобных интерфейсов без необходимости использования внешних CSS файлов
+ - **Heroicons**: 316 бесплатных SVG иконок для вашего приложения
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+TODO: написать
