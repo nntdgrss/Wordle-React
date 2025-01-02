@@ -1,10 +1,19 @@
 import Modal from "react-modal";
 import Button from "./Button";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
+import {
+  ArchiveBoxIcon,
+  BeakerIcon,
+  LanguageIcon,
+  PlayIcon,
+} from "@heroicons/react/24/outline";
+import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 
 export default function Menu() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [language, setLanguage] = useState("ru");
+  const navigate = useNavigate();
 
   useEffect(() => {
     Modal.setAppElement("#root");
@@ -45,24 +54,40 @@ export default function Menu() {
 
   return (
     <>
-      <div className="flex justify-center w-screen">
-        <h1 className="font-montserrat font-semibold text-5xl mt-32">Вордли</h1>
+      <div className="flex flex-col items-center w-screen">
+        <h1 className="font-montserrat font-semibold text-5xl mt-32 hover:text-sky-400 transition-all duration-200 ease-in-out cursor-default">
+          Вордли
+        </h1>
+        <p className="font-montserrat text-gray-300 text-lg mt-4 cursor-default">
+          Угадайте слово из пяти букв за шесть попыток
+        </p>
       </div>
 
-      <div className="flex justify-center w-screen mt-10">
-        <div className="flex flex-col w-[90%] md:w-[30%] bg-gray-600 p-6 rounded-lg">
-          <Button text="Начать игру" />
-          <Button text="Выбрать язык" onClick={openModal} />
-          <Button text="Настройки" />
+      <div className="flex justify-center w-auto mt-10">
+        <div className="flex flex-col w-[90%] md:w-[30%] bg-gray-600 p-6 rounded-lg border-transparent border-solid border-2 hover:border-sky-500 transition-all duration-400">
           <Button
-            text="Автор"
-            onClick={() => window.open("https://github.com/nntdgrss", "_blank")}
+            text="Начать игру"
+            icon={<PlayIcon />}
+            onClick={() => navigate("/game")}
+          />
+          <Button
+            text="Выбрать язык"
+            icon={<LanguageIcon />}
+            onClick={openModal}
+          />
+          <Button text="Настройки" icon={<Cog6ToothIcon />} />
+          <Button
+            text="GitHub"
+            icon={<ArchiveBoxIcon />}
+            onClick={() =>
+              window.open("https://github.com/nntdgrss/Wordle-React", "_blank")
+            }
           />
         </div>
       </div>
 
       <h1 className="font-montserrat text-1xl mt-auto mb-5 text-center fixed bottom-0 w-full text-gray-400">
-        Created by{" "}
+        {<BeakerIcon className="size-5 inline-block mr-2" />}Created by{" "}
         <a
           href="https://github.com/nntdgrss"
           target="_blank"
