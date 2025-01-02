@@ -1,8 +1,45 @@
-# React + Vite
+# Wordle на русском языке
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Игра Wordle, реализованная на React с поддержкой русского языка.
 
-Currently, two official plugins are available:
+## Особенности
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🎮 Полностью на русском языке
+- 🌓 Темная и светлая темы
+- 📱 Адаптивный дизайн
+- ✨ Анимации и визуальные эффекты
+- 🎯 Интуитивный интерфейс
+
+## Технологии
+
+- React
+- Vite
+- Tailwind CSS
+- React Router
+- React Modal
+- Heroicons
+
+## Установка и запуск
+
+1. Клонируйте репозиторий:
+
+```bash
+git clone https://github.com/your-username/wordle-react.git
+cd wordle-react
+```
+
+2. Установите зависимости:
+
+```bash
+npm install
+```
+
+3. Запустите проект в режиме разработки:
+
+```bash
+npm run dev
+```
+
+## Лицензия
+
+MIT

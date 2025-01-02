@@ -1,6 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
+import Modal from "react-modal";
+import {
+  ArrowPathIcon,
+  HomeIcon,
+  ArrowLeftIcon,
+} from "@heroicons/react/24/outline";
 import { WORDS } from "./words";
+import { useNavigate } from "react-router";
+import ThemeToggle from "../ThemeToggle";
 
 // Константы для статусов букв
 const LETTER_STATUS = {
@@ -11,6 +19,50 @@ const LETTER_STATUS = {
   REVEALED: "revealed",
 };
 
+// Стили для модального окна
+const customModalStyles = {
+  content: {
+    top: "50%",
+    left: "50%",
+    right: "auto",
+    bottom: "auto",
+    transform: "translate(-50%, -50%)",
+    backgroundColor: "var(--bg-secondary)",
+    borderRadius: "1rem",
+    border: "2px solid var(--border-color)",
+    padding: "2rem",
+    maxWidth: "400px",
+    width: "90%",
+    zIndex: 200,
+  },
+  overlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.75)",
+    backdropFilter: "blur(4px)",
+    zIndex: 200,
+  },
+};
+
+Modal.setAppElement("#root");
+
+// Компонент конфетти
+const Confetti = () => (
+  <div className="confetti-container">
+    {Array(50)
+      .fill(null)
+      .map((_, i) => (
+        <div
+          key={i}
+          className="confetti"
+          style={{
+            "--delay": `${Math.random() * 3}s`,
+            "--rotation": `${Math.random() * 360}deg`,
+            "--position": `${Math.random() * 100}%`,
+          }}
+        />
+      ))}
+  </div>
+);
+
 // Компонент для отображения клавиатуры
 const Keyboard = ({ onKeyPress, letterStatuses }) => {
   const rows = [
@@ -20,14 +72,14 @@ const Keyboard = ({ onKeyPress, letterStatuses }) => {
   ];
 
   return (
-    <div className="flex flex-col gap-2 w-full max-w-3xl mx-auto mt-4">
+    <div className="flex flex-col gap-1 sm:gap-2 w-full max-w-3xl mx-auto mt-4">
       {rows.map((row, i) => (
         <div key={i} className="flex justify-center gap-1">
           {row.map((key) => (
             <button
               key={key}
               onClick={() => onKeyPress(key)}
-              className={`px-2 py-4 rounded-lg font-bold text-sm transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5
+              className={`w-[8vw] h-[8vw] sm:w-auto sm:h-auto sm:px-2 sm:py-4 rounded-lg font-bold text-sm transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 min-w-[20px]
                 ${
                   letterStatuses[key] === LETTER_STATUS.CORRECT
                     ? "bg-green-600 text-white hover:bg-green-700"
@@ -46,13 +98,13 @@ const Keyboard = ({ onKeyPress, letterStatuses }) => {
       <div className="flex justify-center gap-2">
         <button
           onClick={() => onKeyPress("Backspace")}
-          className="px-6 py-4 rounded-lg bg-gray-700 text-gray-200 font-bold shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 hover:bg-gray-600"
+          className="w-[15vw] sm:w-auto px-3 sm:px-6 py-4 rounded-lg bg-gray-700 text-gray-200 font-bold shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 hover:bg-gray-600"
         >
           ←
         </button>
         <button
           onClick={() => onKeyPress("Enter")}
-          className="px-6 py-4 rounded-lg bg-gray-700 text-gray-200 font-bold shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 hover:bg-gray-600"
+          className="w-[15vw] sm:w-auto px-3 sm:px-6 py-4 rounded-lg bg-gray-700 text-gray-200 font-bold shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 hover:bg-gray-600"
         >
           ВВОД
         </button>
@@ -67,7 +119,7 @@ Keyboard.propTypes = {
 };
 
 // Компонент для отображения одной буквы
-const Letter = ({ value, status, revealedLetters }) => {
+const Letter = ({ value, status, revealedLetters, isCorrectWord }) => {
   const isRevealed = revealedLetters && revealedLetters[value.toLowerCase()];
 
   return (
@@ -85,6 +137,7 @@ const Letter = ({ value, status, revealedLetters }) => {
           : "border-gray-600 text-gray-300 bg-gray-800 shadow-gray-900/20"
       }
       ${status !== LETTER_STATUS.EMPTY ? "shadow-lg" : ""}
+      ${isCorrectWord ? "animate-bounce-once" : ""}
       `}
     >
       {value.toUpperCase()}
@@ -96,21 +149,38 @@ Letter.propTypes = {
   value: PropTypes.string.isRequired,
   status: PropTypes.string.isRequired,
   revealedLetters: PropTypes.objectOf(PropTypes.bool),
+  isCorrectWord: PropTypes.bool,
 };
 
 // Компонент для отображения строки букв
-const Row = ({ word, statuses, revealedLetters }) => (
-  <div className="flex gap-2">
-    {Array(5)
-      .fill(null)
-      .map((_, i) => (
-        <Letter
-          key={i}
-          value={word[i] || ""}
-          status={statuses[i] || LETTER_STATUS.EMPTY}
-          revealedLetters={revealedLetters}
-        />
-      ))}
+const Row = ({
+  word,
+  statuses,
+  revealedLetters,
+  rowIndex,
+  currentRow,
+  message,
+  isCorrectWord,
+}) => (
+  <div className="relative flex justify-center w-full">
+    <div className="flex gap-2">
+      {Array(5)
+        .fill(null)
+        .map((_, i) => (
+          <Letter
+            key={i}
+            value={word[i] || ""}
+            status={statuses[i] || LETTER_STATUS.EMPTY}
+            revealedLetters={revealedLetters}
+            isCorrectWord={isCorrectWord}
+          />
+        ))}
+    </div>
+    {rowIndex === currentRow && message && (
+      <div className="hidden sm:block absolute left-full top-1/2 -translate-y-1/2 ml-4 bg-red-500/10 border-l-4 border-red-500 pl-3 pr-4 py-2 rounded-r-lg text-red-400 text-sm animate-fade-in whitespace-nowrap shadow-lg backdrop-blur-sm">
+        {message}
+      </div>
+    )}
   </div>
 );
 
@@ -118,7 +188,16 @@ Row.propTypes = {
   word: PropTypes.string.isRequired,
   statuses: PropTypes.arrayOf(PropTypes.string).isRequired,
   revealedLetters: PropTypes.objectOf(PropTypes.bool),
+  rowIndex: PropTypes.number,
+  currentRow: PropTypes.number,
+  message: PropTypes.string,
+  isCorrectWord: PropTypes.bool,
 };
+
+// Компонент для эффекта проигрыша
+const LoseEffect = () => (
+  <div className="absolute inset-0 bg-red-500/20 animate-pulse-once backdrop-blur-sm z-40" />
+);
 
 export default function Game() {
   const [targetWord, setTargetWord] = useState("");
@@ -128,11 +207,29 @@ export default function Game() {
   const [letterStatuses, setLetterStatuses] = useState({});
   const [message, setMessage] = useState("");
   const [revealedLetters, setRevealedLetters] = useState({});
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [lastCorrectRow, setLastCorrectRow] = useState(-1);
+  const navigate = useNavigate();
 
   // Инициализация игры
   useEffect(() => {
     const randomWord = WORDS[Math.floor(Math.random() * WORDS.length)];
     setTargetWord(randomWord);
+  }, []);
+
+  const resetGame = useCallback(() => {
+    const randomWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+    setTargetWord(randomWord);
+    setGuesses(Array(6).fill(""));
+    setCurrentRow(0);
+    setGameStatus("playing");
+    setLetterStatuses({});
+    setMessage("");
+    setRevealedLetters({});
+    setShowConfetti(false);
+    setIsModalOpen(false);
+    setLastCorrectRow(-1);
   }, []);
 
   // Проверка слова
@@ -190,8 +287,6 @@ export default function Game() {
         }
 
         const statuses = checkGuess(currentGuess);
-
-        // Обновляем статусы букв на клавиатуре
         const newLetterStatuses = { ...letterStatuses };
         const newRevealedLetters = { ...revealedLetters };
 
@@ -208,7 +303,6 @@ export default function Game() {
             newLetterStatuses[letter] = currentStatus;
           }
 
-          // Обновляем разгаданные буквы
           if (currentStatus === LETTER_STATUS.CORRECT) {
             newRevealedLetters[letter] = true;
           }
@@ -218,13 +312,17 @@ export default function Game() {
         setRevealedLetters(newRevealedLetters);
 
         if (currentGuess === targetWord) {
+          setLastCorrectRow(currentRow);
           setGameStatus("won");
-          setMessage("Поздравляем! Вы угадали слово!");
+          setShowConfetti(true);
+          setTimeout(() => {
+            setIsModalOpen(true);
+          }, 1000);
         } else if (currentRow === 5) {
           setGameStatus("lost");
-          setMessage(
-            `Игра окончена. Загаданное слово: ${targetWord.toUpperCase()}`
-          );
+          setTimeout(() => {
+            setIsModalOpen(true);
+          }, 1500);
         } else {
           setCurrentRow((prev) => prev + 1);
         }
@@ -234,6 +332,8 @@ export default function Game() {
           newGuesses[currentRow] = currentGuess + key;
           return newGuesses;
         });
+      } else if (/^[a-zA-Z0-9]$/.test(key)) {
+        setMessage("Используйте русскую раскладку клавиатуры");
       }
     },
     [
@@ -250,11 +350,11 @@ export default function Game() {
   // Обработка физической клавиатуры
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (
-        e.key === "Backspace" ||
-        e.key === "Enter" ||
-        /^[а-яё]$/.test(e.key)
-      ) {
+      if (e.key === "Backspace" || e.key === "Enter") {
+        handleKeyPress(e.key);
+      } else if (/^[а-яёА-ЯЁ]$/.test(e.key)) {
+        handleKeyPress(e.key.toLowerCase());
+      } else if (/^[a-zA-Z0-9]$/.test(e.key)) {
         handleKeyPress(e.key);
       }
     };
@@ -265,32 +365,97 @@ export default function Game() {
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 p-4">
-      <h1 className="text-4xl font-bold text-gray-100 mb-8">Wordle</h1>
+      <div className="absolute top-4 left-4">
+        <button
+          onClick={() => navigate("/")}
+          className="flex items-center gap-2 px-3 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors shadow-lg"
+        >
+          <ArrowLeftIcon className="w-5 h-5" />
+          <span className="hidden sm:inline">В меню</span>
+        </button>
+      </div>
 
-      {message && (
-        <div className="bg-gray-800 border-l-4 border-blue-500 text-blue-400 p-4 rounded-lg shadow-md mb-6 animate-fade-in">
-          {message}
+      <h1 className="text-4xl font-bold text-gray-100 mb-2">Wordle</h1>
+
+      <div className="h-[60px] flex items-center justify-center mb-2 sm:hidden">
+        {message && (
+          <div className="inline-block bg-red-500/10 border-l-4 border-red-500 pl-3 pr-4 py-2 rounded-r-lg text-red-400 text-sm animate-fade-in backdrop-blur-sm">
+            {message}
+          </div>
+        )}
+      </div>
+
+      <div className="relative w-full max-w-lg mx-auto">
+        {showConfetti && <Confetti />}
+        {gameStatus === "lost" && <LoseEffect />}
+
+        <div className="flex flex-col gap-2 mb-8">
+          {guesses.map((guess, i) => (
+            <Row
+              key={i}
+              word={guess}
+              statuses={
+                i === currentRow
+                  ? Array(5).fill(LETTER_STATUS.EMPTY)
+                  : i < currentRow
+                  ? checkGuess(guess)
+                  : Array(5).fill(LETTER_STATUS.EMPTY)
+              }
+              revealedLetters={revealedLetters}
+              rowIndex={i}
+              currentRow={currentRow}
+              message={i === currentRow ? message : ""}
+              isCorrectWord={i === lastCorrectRow}
+            />
+          ))}
         </div>
-      )}
-
-      <div className="flex flex-col gap-2 mb-8">
-        {guesses.map((guess, i) => (
-          <Row
-            key={i}
-            word={guess}
-            statuses={
-              i === currentRow
-                ? Array(5).fill(LETTER_STATUS.EMPTY)
-                : i < currentRow
-                ? checkGuess(guess)
-                : Array(5).fill(LETTER_STATUS.EMPTY)
-            }
-            revealedLetters={revealedLetters}
-          />
-        ))}
       </div>
 
       <Keyboard onKeyPress={handleKeyPress} letterStatuses={letterStatuses} />
+
+      <ThemeToggle className="fixed bottom-4 right-4 z-50" />
+
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={() => {
+          setIsModalOpen(false);
+          setShowConfetti(false);
+        }}
+        style={customModalStyles}
+        contentLabel="Game Over"
+      >
+        <div className="text-center">
+          <h2
+            className="text-2xl font-bold mb-4"
+            style={{ color: "var(--text-primary)" }}
+          >
+            {gameStatus === "won" ? "Поздравляем!" : "Игра окончена"}
+          </h2>
+          <p className="mb-6" style={{ color: "var(--text-secondary)" }}>
+            {gameStatus === "won"
+              ? `Вы угадали слово! Слово: ${targetWord.toUpperCase()}`
+              : `Загаданное слово было: ${targetWord.toUpperCase()}`}
+          </p>
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={resetGame}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <ArrowPathIcon className="w-5 h-5" />
+              <span>Играть снова</span>
+            </button>
+            <button
+              onClick={() => {
+                navigate("/");
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              <HomeIcon className="w-5 h-5" />
+              <span>В меню</span>
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
