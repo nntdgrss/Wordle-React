@@ -125,7 +125,10 @@ export default function Menu() {
             </span>
           ))}
         </div>
-        <p className="font-montserrat text-gray-300 text-lg mt-4 cursor-default text-center px-4">
+        <p
+          className="font-montserrat text-gray-300 text-lg mt-4 cursor-default text-center px-4"
+          translate="no"
+        >
           Угадайте слово из пяти букв за шесть попыток
         </p>
       </div>
@@ -167,7 +170,10 @@ export default function Menu() {
         </div>
       </div>
 
-      <h1 className="font-montserrat text-1xl mt-auto mb-5 text-center fixed bottom-0 w-full text-gray-400">
+      <h1
+        className="font-montserrat text-1xl mt-auto mb-5 text-center fixed bottom-0 w-full text-gray-400"
+        translate="no"
+      >
         {<BeakerIcon className="size-5 inline-block mr-2" />}Created by{" "}
         <a
           href="https://github.com/nntdgrss"

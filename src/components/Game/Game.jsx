@@ -392,7 +392,9 @@ export default function Game() {
         </button>
       </div>
 
-      <h1 className="text-4xl font-bold text-gray-100 mb-2">Wordle</h1>
+      <h1 className="text-4xl font-bold text-gray-100 mb-2" translate="no">
+        Wordle
+      </h1>
 
       <div className="h-[60px] flex items-center justify-center mb-2 sm:hidden">
         {message && (
