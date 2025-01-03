@@ -89,6 +89,7 @@ const Keyboard = ({ onKeyPress, letterStatuses }) => {
                     ? "bg-gray-600 text-white hover:bg-gray-700"
                     : "bg-gray-700 text-gray-200 hover:bg-gray-600"
                 }`}
+              translate="no"
             >
               {key.toUpperCase()}
             </button>
@@ -105,6 +106,7 @@ const Keyboard = ({ onKeyPress, letterStatuses }) => {
         <button
           onClick={() => onKeyPress("Enter")}
           className="w-[15vw] sm:w-[80px] h-[55px] rounded-lg bg-gray-700 text-gray-200 font-bold shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 hover:bg-gray-600"
+          translate="no"
         >
           ВВОД
         </button>
