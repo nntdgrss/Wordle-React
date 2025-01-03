@@ -72,14 +72,14 @@ const Keyboard = ({ onKeyPress, letterStatuses }) => {
   ];
 
   return (
-    <div className="flex flex-col gap-1 sm:gap-2 w-full max-w-3xl mx-auto mt-4">
+    <div className="flex flex-col gap-1 sm:gap-2 w-full max-w-[800px] mx-auto mt-4">
       {rows.map((row, i) => (
         <div key={i} className="flex justify-center gap-1">
           {row.map((key) => (
             <button
               key={key}
               onClick={() => onKeyPress(key)}
-              className={`w-[8vw] h-[8vw] sm:w-auto sm:h-auto sm:px-2 sm:py-4 rounded-lg font-bold text-sm transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 min-w-[20px]
+              className={`w-[8vw] h-[8vw] sm:w-[45px] sm:h-[55px] rounded-lg font-bold text-sm sm:text-base transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 min-w-[20px]
                 ${
                   letterStatuses[key] === LETTER_STATUS.CORRECT
                     ? "bg-green-600 text-white hover:bg-green-700"
@@ -98,13 +98,13 @@ const Keyboard = ({ onKeyPress, letterStatuses }) => {
       <div className="flex justify-center gap-2">
         <button
           onClick={() => onKeyPress("Backspace")}
-          className="w-[15vw] sm:w-auto px-3 sm:px-6 py-4 rounded-lg bg-gray-700 text-gray-200 font-bold shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 hover:bg-gray-600"
+          className="w-[15vw] sm:w-[80px] h-[55px] rounded-lg bg-gray-700 text-gray-200 font-bold shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 hover:bg-gray-600"
         >
           ←
         </button>
         <button
           onClick={() => onKeyPress("Enter")}
-          className="w-[15vw] sm:w-auto px-3 sm:px-6 py-4 rounded-lg bg-gray-700 text-gray-200 font-bold shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 hover:bg-gray-600"
+          className="w-[15vw] sm:w-[80px] h-[55px] rounded-lg bg-gray-700 text-gray-200 font-bold shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 hover:bg-gray-600"
         >
           ВВОД
         </button>
@@ -119,12 +119,22 @@ Keyboard.propTypes = {
 };
 
 // Компонент для отображения одной буквы
-const Letter = ({ value, status, revealedLetters, isCorrectWord }) => {
-  const isRevealed = revealedLetters && revealedLetters[value.toLowerCase()];
+const Letter = ({
+  value,
+  status,
+  revealedLetters,
+  position,
+  isCorrectWord,
+}) => {
+  const isRevealed =
+    revealedLetters &&
+    revealedLetters[value.toLowerCase()] &&
+    revealedLetters[value.toLowerCase()].includes(position) &&
+    status === LETTER_STATUS.EMPTY;
 
   return (
     <div
-      className={`w-14 h-14 border-2 flex items-center justify-center font-bold text-2xl rounded-lg transition-all duration-300
+      className={`w-[14vw] h-[14vw] sm:w-[62px] sm:h-[62px] border-2 flex items-center justify-center font-bold text-2xl rounded-lg transition-all duration-300
       ${
         status === LETTER_STATUS.CORRECT
           ? "bg-green-600 border-green-500 text-white shadow-green-900/20"
@@ -148,7 +158,8 @@ const Letter = ({ value, status, revealedLetters, isCorrectWord }) => {
 Letter.propTypes = {
   value: PropTypes.string.isRequired,
   status: PropTypes.string.isRequired,
-  revealedLetters: PropTypes.objectOf(PropTypes.bool),
+  revealedLetters: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.number)),
+  position: PropTypes.number.isRequired,
   isCorrectWord: PropTypes.bool,
 };
 
@@ -172,6 +183,7 @@ const Row = ({
             value={word[i] || ""}
             status={statuses[i] || LETTER_STATUS.EMPTY}
             revealedLetters={revealedLetters}
+            position={i}
             isCorrectWord={isCorrectWord}
           />
         ))}
@@ -187,7 +199,7 @@ const Row = ({
 Row.propTypes = {
   word: PropTypes.string.isRequired,
   statuses: PropTypes.arrayOf(PropTypes.string).isRequired,
-  revealedLetters: PropTypes.objectOf(PropTypes.bool),
+  revealedLetters: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.number)),
   rowIndex: PropTypes.number,
   currentRow: PropTypes.number,
   message: PropTypes.string,
@@ -304,7 +316,12 @@ export default function Game() {
           }
 
           if (currentStatus === LETTER_STATUS.CORRECT) {
-            newRevealedLetters[letter] = true;
+            if (!newRevealedLetters[letter]) {
+              newRevealedLetters[letter] = [];
+            }
+            if (!newRevealedLetters[letter].includes(index)) {
+              newRevealedLetters[letter].push(index);
+            }
           }
         });
 
@@ -364,7 +381,7 @@ export default function Game() {
   }, [handleKeyPress]);
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 p-4">
+    <div className="flex flex-col items-center min-h-screen bg-gray-800 p-4">
       <div className="absolute top-4 left-4">
         <button
           onClick={() => navigate("/")}
